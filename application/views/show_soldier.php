@@ -8,6 +8,9 @@
             </div>
             <div class="row col-sm-8 col-lg-offset-4">
                 <div class="form-group">
+                	<div class="col-sm-2"><image src="<?php echo base_url();?>/assets/images/<?php echo $soldier['picture'];?>" height='150' width='150'></div>
+                </div>
+                <div class="form-group">
                     <div class="col-sm-2">Rank </div>: <?php echo $soldier['rank'];?>
                 </div>
                 <div class="form-group">
@@ -36,7 +39,7 @@
                                 <tr>
                                 <div style="width: 100%;">
                                     <br>
-                                    <?php echo $comments['description'];?>
+                                    <?php echo html_entity_decode($comments['description']);?>
                                     <br>
                                 </div>
                                 
@@ -64,7 +67,8 @@
 <script type="text/javascript">
     $(function(){
         $('#submit_remark').on('click',function(){
-            var text = $('#text_remark').val();
+            var txt = $('#text_remark').val();
+            var text = txt.replace("<br>",",");
             var id = <?php echo $soldier['id'];?>;
             $.ajax({
                 dataType: 'json',

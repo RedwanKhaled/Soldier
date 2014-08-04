@@ -41,6 +41,35 @@ class Soldier extends CI_Controller {
         $this->load->view('templates/footer.php',$this->data);
     }
     
+    public function image_upload($file_info)
+    {
+        $data = null;
+        if (isset($file_info))
+        {
+            $config['image_library'] = 'gd2';
+            $config['upload_path'] = 'assets/images/';
+            $config['allowed_types'] = 'gif|jpg|png|jpeg';
+            $config['max_size'] = '10240';
+            //$config['maintain_ratio'] = FALSE;
+            $config['width'] = 120;
+            $config['height'] = 120;
+            //$config['create_thumb'] = TRUE;
+
+            $this->load->library('upload', $config);
+
+            if (!$this->upload->do_upload()) {
+                $error = array('error' => $this->upload->display_errors());
+                return $data = $error;
+            } else {
+                $upload_data = $this->upload->data();
+                $data = array('upload_data' => $upload_data);
+                return $data;
+            }
+        }
+        return $data;
+
+    }
+    
     public function add_soldier_info()
     {
         $this->data['message'] = '';
@@ -55,7 +84,21 @@ class Soldier extends CI_Controller {
         {
             if($this->form_validation->run() == true)
             {
-
+                
+                if (isset($_FILES["userfile"]))
+                {
+                    $file_info = $_FILES["userfile"];
+                    $uploaded_image_data = $this->image_upload($file_info);
+                    if(isset($uploaded_image_data['error'])) {
+                        $this->data['message'] = strip_tags($uploaded_image_data['error']);
+                        echo json_encode($this->data);
+                        return;
+                    }else if(!empty($uploaded_image_data['upload_data']['file_name'])){
+                        //$path = FCPATH.NEWS_IMAGE_PATH.$uploaded_image_data['upload_data']['file_name'];
+                        //unlink($path);
+                    }
+                }
+                
                 $first = $this->input->post('first_name');
                 $last = $this->input->post('last_name');
                 $rank = $this->input->post('rank');
@@ -66,6 +109,8 @@ class Soldier extends CI_Controller {
                   'last_name' => $last,  
                   'rank' => $rank,  
                   'address' => $this->input->post('address'),
+                  'created_on' => now(),
+                  'picture' => empty($uploaded_image_data['upload_data']['file_name'])? '' : $uploaded_image_data['upload_data']['file_name'],
                   'phone' => $this->input->post('phone')  
                 );
                 
